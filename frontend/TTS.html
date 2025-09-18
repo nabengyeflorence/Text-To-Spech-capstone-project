@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Audio Summarizer</title>
+  <link rel="stylesheet" href="TTS.css">
+</head>
+<body>
+  <div class="card" role="main" aria-labelledby="title">
+    <h1 id="title">Audio Summarizer</h1>
+
+    <textarea id="text">Hello! Welcome to my AWS Cloud Intensive Capstone project.
+
+Happy Coding.</textarea>
+
+    <div class="controls">
+      <select id="voice" title="Voice">
+        <option value="Amy">Amy (British English)</option>
+        <option value="Joanna" selected>Joanna (US English)</option>
+        <option value="Matthew">Matthew (US English)</option>
+        <option value="Olivia">Olivia (US English)</option>
+        <option value="Aditi">Aditi (Indian English)</option>
+      </select>
+
+      <select id="format" title="Format">
+        <option value="mp3">mp3</option>
+        <option value="ogg_vorbis">ogg</option>
+      </select>
+
+      <button id="convert" class="btn-primary">Convert to Speech</button>
+    </div>
+
+    <div class="audio-wrap">
+      <audio id="player" controls preload="none"></audio>
+      <button id="download" class="btn-download" style="display:none">Download Audio</button>
+      <div id="status" class="status"></div>
+    </div>
+  </div>
+
+<script>
+  
+  const API_BASE = "https://bnulmaxmd2.execute-api.us-east-1.amazonaws.com"; 
+  const textEl = document.getElementById("text");
+  const voiceEl = document.getElementById("voice");
+  const fmtEl = document.getElementById("format");
+  const convertBtn = document.getElementById("convert");
+  const player = document.getElementById("player");
+  const downloadBtn = document.getElementById("download");
+  const status = document.getElementById("status");
+
+  let lastUrl = null;
+
+  convertBtn.addEventListener("click", async () => {
+    const txt = textEl.value.trim();
+    if (!txt) { status.textContent = "Please enter text."; return; }
+
+    convertBtn.disabled = true;
+    status.textContent = "Generating audio...";
+
+    try {
+      const payload = { text: txt, voice: voiceEl.value, format: fmtEl.value };
+      const res = await fetch(API_BASE + "/synthesize", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload)
+      });
+
+      const json = await res.json();
+      if (!res.ok) {
+        status.textContent = "Error: " + (json.error || res.statusText);
+        convertBtn.disabled = false;
+        return;
+      }
+
+      lastUrl = json.url;
+      player.src = lastUrl;
+      player.load();
+      downloadBtn.style.display = "inline-block";
+      downloadBtn.onclick = () => { window.open(lastUrl, "_blank"); };
+      status.textContent = "Audio ready. Use the player below or download.";
+    } catch (err) {
+      console.error(err);
+      status.textContent = "Network error: " + err.message;
+    } finally {
+      convertBtn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
