@@ -18,7 +18,7 @@ A serverless web application that converts user text (typed ) into **natural-sou
 - HTTPS frontend served via CloudFront.  
 
 ## Architecture
-
+![Alt text](architechture.jpg)
 
 ##  Project Structure
 
