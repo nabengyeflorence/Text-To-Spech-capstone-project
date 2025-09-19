@@ -19,12 +19,11 @@ resource "aws_s3_bucket_policy" "frontend_policy" {
     }]
   })
 }
-
 resource "aws_cloudfront_distribution" "cdn" {
   enabled             = true
   is_ipv6_enabled     = true
   comment             = "Front-end CDN for TTS app"
-  default_root_object = "TTS.html"
+  default_root_object = "index.html"
 
   origin {
     domain_name = aws_s3_bucket.frontend.bucket_regional_domain_name
@@ -64,4 +63,3 @@ resource "aws_cloudfront_distribution" "cdn" {
     Environment = "prod"
   }
 }
-
